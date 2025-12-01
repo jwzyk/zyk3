@@ -11,10 +11,11 @@ export default async function WZRYPage() {
   }
   
   const data = await response.json();
-  const allGuides = data.success && Array.isArray(data.data) ? data.data : [];
-  const guides = allGuides.filter(guide => {
-    // 确保guide是有效的对象
-    return typeof guide === 'object' && guide !== null && guide.game === "王者荣耀";
+  // 确保allGuides是一个数组
+  const allGuides = Array.isArray(data?.data) ? data.data : [];
+  // 简化过滤逻辑，确保类型安全
+  const guides = allGuides.filter((guide: any) => {
+    return guide && typeof guide === 'object' && guide.game === "王者荣耀";
   });
 
   return (
@@ -44,26 +45,33 @@ export default async function WZRYPage() {
 
         {/* 攻略列表 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {guides.map((guide) => (
-            <div key={guide.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">{guide.category}</span>
-                  <span className="text-xs text-gray-500">{guide.date}</span>
-                  <span className="text-xs text-gray-500">{guide.views} 阅读</span>
+          {/* 确保guides是数组且不为空 */}
+          {Array.isArray(guides) && guides.length > 0 ? (
+            guides.map((guide: any) => (
+              <div key={guide.id || Math.random()} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full">{guide.category || '攻略'}</span>
+                    <span className="text-xs text-gray-500">{guide.date || '2024-01-01'}</span>
+                    <span className="text-xs text-gray-500">{guide.views || 0} 阅读</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 hover:text-purple-600 transition-colors mb-3">
+                    {guide.title || '攻略标题'}
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    这是一篇关于{guide.title || '游戏'}的详细攻略，包含最新的游戏技巧、英雄分析和实战经验分享...
+                  </p>
+                  <Link href={`/games/wzry/guides/${guide.id || '1'}`} className="inline-block text-purple-600 font-medium hover:underline">
+                    阅读全文 →
+                  </Link>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 hover:text-purple-600 transition-colors mb-3">
-                  {guide.title}
-                </h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">
-                  这是一篇关于{guide.title}的详细攻略，包含最新的游戏技巧、英雄分析和实战经验分享...
-                </p>
-                <Link href={`/games/wzry/guides/${guide.id}`} className="inline-block text-purple-600 font-medium hover:underline">
-                  阅读全文 →
-                </Link>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 bg-white rounded-lg shadow-md">
+              <p className="text-gray-600">暂无攻略数据</p>
             </div>
-          ))}
+          )}
         </div>
 
         {/* 分页 */}
